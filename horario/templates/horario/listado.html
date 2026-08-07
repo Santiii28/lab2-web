@@ -1,0 +1,10 @@
+{% extends 'horario/base.html' %}
+
+{% block content %}
+    <h2>Listado de Clases</h2>
+    <ul>
+        {% for clase in clases %}
+            <li><a href="{% url 'detalle' clase.id %}">{{ clase.nombre }}</a></li>
+        {% endfor %}
+    </ul>
+{% endblock %}

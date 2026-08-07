@@ -1,0 +1,13 @@
+{% extends 'horario/base.html' %}
+
+{% block content %}
+    <h2>Detalle de Clase</h2>
+    <p><strong>Nombre:</strong> {{ clase.nombre }}</p>
+    <p><strong>Horario:</strong> {{ clase.horario }}</p>
+    <p><strong>Instructor:</strong> {{ clase.instructor.nombre }} — {{ clase.instructor.contacto }}</p>
+{% if clase.inscritos >= clase.cupo %}
+    <p>La clase está llena. No se pueden inscribir más alumnos.</p>
+{% else %}
+    <p>Quedan cupos disponibles.</p>
+{% endif %}
+{% endblock %}
