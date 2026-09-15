@@ -1,4 +1,11 @@
 from django.db import models
+from mongoengine import Document, StringField
+
+
+class Reserva(Document):
+    nombre_miembro = StringField()
+    clase = StringField()
+    fecha = StringField()
 
 
 class Instructor(models.Model):

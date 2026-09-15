@@ -12,9 +12,11 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 
 from pathlib import Path
 
-from .local_settings import DB_PASSWORD
+from mongoengine import connect
 
+from .local_settings import DB_PASSWORD, MONGO_URI
 
+connect(host=MONGO_URI)
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -85,6 +87,7 @@ DATABASES = {
         'PORT': '3306',
     }
 }
+
 
 
 

@@ -1,34 +1,21 @@
 import json
 
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Clase, Reserva
+from .models import Reserva
 
-
-def listado(request):
-    clases = Clase.objects.all()
-    return render(request, 'horario/listado.html', {'clases': clases})
-
-
-def detalle(request, clase_id):
-    clase = get_object_or_404(Clase, id=clase_id)
-    return render(request, 'horario/detalle.html', {'clase': clase})
-
-
-# CRUD de Reserva (MongoDB)
 
 # CREATE
 @csrf_exempt
-def crear_reserva(request):
+def crear(request):
     datos = json.loads(request.body)
     reserva = Reserva(**datos).save()
     return JsonResponse({'id': str(reserva.id)})
 
 
 # READ
-def listar_reservas(request):
+def listar(request):
     reservas = Reserva.objects()
     return JsonResponse(
         [{'id': str(r.id), 'nombre_miembro': r.nombre_miembro, 'clase': r.clase, 'fecha': r.fecha} for r in reservas],
@@ -38,7 +25,7 @@ def listar_reservas(request):
 
 # UPDATE
 @csrf_exempt
-def actualizar_reserva(request, id):
+def actualizar(request, id):
     datos = json.loads(request.body)
     Reserva.objects(id=id).update(**datos)
     return JsonResponse({'ok': True})
@@ -46,6 +33,6 @@ def actualizar_reserva(request, id):
 
 # DELETE
 @csrf_exempt
-def eliminar_reserva(request, id):
+def eliminar(request, id):
     Reserva.objects(id=id).delete()
     return JsonResponse({'ok': True})
