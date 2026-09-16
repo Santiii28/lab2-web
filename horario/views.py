@@ -1,10 +1,9 @@
-import json
-
-from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
+from rest_framework import viewsets, status
+from rest_framework.response import Response
 
 from .models import Clase, Reserva
+from .serializers import ReservaSerializer
 
 
 def listado(request):
@@ -17,35 +16,34 @@ def detalle(request, clase_id):
     return render(request, 'horario/detalle.html', {'clase': clase})
 
 
-# CRUD de Reserva (MongoDB)
+class ReservaViewSet(viewsets.ViewSet):
 
-# CREATE
-@csrf_exempt
-def crear_reserva(request):
-    datos = json.loads(request.body)
-    reserva = Reserva(**datos).save()
-    return JsonResponse({'id': str(reserva.id)})
+    def list(self, request):
+        reservas = Reserva.objects()
+        return Response(ReservaSerializer(reservas, many=True).data)
 
+    def retrieve(self, request, pk=None):
+        reserva = Reserva.objects(id=pk).first()
+        if not reserva:
+            return Response({'error': 'No encontrada'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(ReservaSerializer(reserva).data)
 
-# READ
-def listar_reservas(request):
-    reservas = Reserva.objects()
-    return JsonResponse(
-        [{'id': str(r.id), 'nombre_miembro': r.nombre_miembro, 'clase': r.clase, 'fecha': r.fecha} for r in reservas],
-        safe=False,
-    )
+    def create(self, request):
+        serializer = ReservaSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        reserva = Reserva(**serializer.validated_data).save()
+        return Response(ReservaSerializer(reserva).data, status=status.HTTP_201_CREATED)
 
+    def update(self, request, pk=None):
+        reserva = Reserva.objects(id=pk).first()
+        if not reserva:
+            return Response({'error': 'No encontrada'}, status=status.HTTP_404_NOT_FOUND)
+        Reserva.objects(id=pk).update(**request.data)
+        return Response(ReservaSerializer(Reserva.objects(id=pk).first()).data)
 
-# UPDATE
-@csrf_exempt
-def actualizar_reserva(request, id):
-    datos = json.loads(request.body)
-    Reserva.objects(id=id).update(**datos)
-    return JsonResponse({'ok': True})
-
-
-# DELETE
-@csrf_exempt
-def eliminar_reserva(request, id):
-    Reserva.objects(id=id).delete()
-    return JsonResponse({'ok': True})
+    def destroy(self, request, pk=None):
+        reserva = Reserva.objects(id=pk).first()
+        if not reserva:
+            return Response({'error': 'No encontrada'}, status=status.HTTP_404_NOT_FOUND)
+        reserva.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
